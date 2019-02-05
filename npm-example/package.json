@@ -1,10 +1,13 @@
 {
-  "name": "HelloWorld",
-  "version": "0.0.1",
-  "dependencies": {
-    "express": "^4.13.3"
+  "name": "npm-example",
+  "version": "0.0.3",
+  "scripts": {
+    "start": "node app"
   },
-    "publishConfig": {
-	"registry": "http://localhost:8081/artifactory/api/npm/npm-shani-local"
-	}
+  "dependencies": {
+    "send": "^0.16.2"
+  },
+  "devDependencies": {
+    "debug": "^4.1.1"
+  }
 }

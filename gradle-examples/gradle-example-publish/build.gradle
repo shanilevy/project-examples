@@ -16,12 +16,10 @@
 
 buildscript {
     repositories {
-	    maven {
-            url 'http://jcenter.bintray.com'
-        }
+        jcenter()
     }
     dependencies {
-        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '3.1.1')
+        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.+')
     }
     configurations.classpath {
         resolutionStrategy {
@@ -31,10 +29,6 @@ buildscript {
     }
 }
 
-import java.text.SimpleDateFormat
-
-def globalVersion = new Version('1.2.x-SNAPSHOT')
-
 def javaProjects() {
     subprojects.findAll { new File(it.projectDir, 'src').directory }
 }
@@ -42,8 +36,13 @@ def javaProjects() {
 allprojects {
     apply plugin: 'com.jfrog.artifactory'
     group = 'org.jfrog.test.gradle.publish'
-    version = globalVersion
-    status = version.status
+    version = currentVersion
+    status = 'Integration'
+    repositories {
+        maven {
+            url "http://localhost:8081/artifactory/jcenter"
+        }
+    }
 }
 
 artifactoryPublish.skip = true
@@ -59,7 +58,6 @@ configure(javaProjects()) {
     dependencies {
         testCompile 'junit:junit:4.7'
     }
-    manifest.mainAttributes(provider: 'gradle')
 
     publishing {
         publications {
@@ -109,11 +107,14 @@ artifactory {
     contextUrl = 'http://localhost:8081/artifactory'
     publish {
         repository {
-            repoKey = 'gradle-snapshot-local'
+            repoKey = 'libs-snapshot-local' // The Artifactory repository key to publish to
             username = "${artifactory_user}" // The publisher user name
             password = "${artifactory_password}" // The publisher password
+            // This is an optional section for configuring Ivy publication (when publishIvy = true).
             ivy {
-                ivyLayout = '[organization]/[module]/ivy-[revision].xml'
+              ivyLayout = '[organization]/[module]/ivy-[revision].xml'
+              artifactLayout = '[organization]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]'
+              mavenCompatible = true //Convert any dots in an [organization] layout value to path separators, similar to Maven's groupId-to-path conversion. True if not specified
             }
         }
         defaults {
@@ -122,47 +123,10 @@ artifactory {
             // published to Artifactory.
             publications('mavenJava')
             publishArtifacts = true
-            properties = ['qa.level': 'basic']
-            properties {
-                archives 'org.jfrog:*:*:*@*', key1: 'val1 only on jars', key2: 'val2 only on jars'
-                all 'org.jfrog:shared:1.?:*@*', key3: 'val3 only in shared', key4: 'val4 only in shared'
-                all 'org.jfrog:*:1.?:*@*', key5: 'val5 on everything published', key6: 'val6 on everything published'
-                all 'org.jfrog:*:2.?:*@*', nokey1: 'noVal1'
-                foo 'org.jfrog:*:2.?:*@*', nokey1: 'noVal2'
-            }
+            // Properties to be attached to the published artifacts.
+            properties = ['qa.level': 'basic', 'dev.team' : 'core']
+            publishPom = true // Publish generated POM files to Artifactory (true by default)
+            publishIvy = true // Publish generated Ivy descriptor files to Artifactory (true by default)
         }
-    }
-    resolve {
-        repoKey = 'repo'
-    }
-}
-
-class Version {
-    String originalVersion
-    String thisVersion
-    String status
-    Date buildTime
-
-    Version(String versionValue) {
-        buildTime = new Date()
-        originalVersion = versionValue
-        if (originalVersion.endsWith('-SNAPSHOT')) {
-            status = 'integration'
-            thisVersion = originalVersion.substring(0, originalVersion.length() - 'SNAPSHOT'.length()) + getTimestamp()
-        } else {
-            status = 'release'
-            thisVersion = versionValue
-        }
-    }
-
-    String getTimestamp() {
-        // Convert local file timestamp to UTC
-        def format = new SimpleDateFormat('yyyyMMddHHmmss')
-        format.setCalendar(Calendar.getInstance(TimeZone.getTimeZone('UTC')));
-        return format.format(buildTime)
-    }
-
-    String toString() {
-        thisVersion
     }
 }
