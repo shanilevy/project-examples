@@ -1,0 +1,26 @@
+{
+    "general_data": {
+        "name": "npm-build-watch",
+        "description": "This is a new watch created using API V2",
+        "active": true
+    },
+    "project_resources": {
+        "resources": [
+            {
+                "type": "build",
+                "bin_mgr_id": "ArtifactoryHA",
+                "name": "npm-example"
+            }
+        ]
+    },
+    "assigned_policies": [
+        {
+            "name": "Security-Policy-Prod",
+            "type": "security"
+        },
+        {
+            "name": "License-Policy-Prod",
+            "type": "license"
+        }
+    ]
+}
