@@ -1,1 +1,17 @@
-
+{
+    "bin_mgr_id": "ArtifactoryHA",
+    "indexed_builds": [
+        "step-5-create-docker-multi-app-helm-chart",
+        "step-1-create-gradle-app",
+        "step-2-create-ui-pkg",
+        "maven-example",
+        "go-lang-build",
+        "step-4-create-docker-app",
+        "step-3-create-docker-framework",
+        "demo_app_pipeline"
+    ],
+    "non_indexed_builds": [
+        "circleci-npm-artifactory",
+        "demo_seven_steps_pipeline"
+    ]
+}
